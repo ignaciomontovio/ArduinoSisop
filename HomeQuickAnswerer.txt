@@ -29,18 +29,18 @@ const char MENSAJE_ESPERANDO_RESPUESTA_SUPERIOR[16] = "   ESPERANDO   ";
 const char MENSAJE_ESPERANDO_RESPUESTA_INFERIOR[16] = "   RESPUESTA   ";
 
 
-const char MENSAJE_1_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_1_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_2_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_2_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_3_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_3_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_4_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_4_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_5_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_5_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_6_INFERIOR[16] = "    Bienvenido";
-const char MENSAJE_6_SUPERIOR[16] = "    Bienvenido";
+const char MENSAJE_1_SUPERIOR[16] = "    No puedo";
+const char MENSAJE_1_INFERIOR[16] = "atenderte ahora";
+const char MENSAJE_2_SUPERIOR[16] = " Estoy saliendo";
+const char MENSAJE_2_INFERIOR[16] = "    esperame";
+const char MENSAJE_3_SUPERIOR[16] = "    No estoy";
+const char MENSAJE_3_INFERIOR[16] = "   interesado";
+const char MENSAJE_4_SUPERIOR[16] = "No me encuentro";
+const char MENSAJE_4_INFERIOR[16] = "en este momento";
+const char MENSAJE_5_SUPERIOR[16] = "  En 5 minutos";
+const char MENSAJE_5_INFERIOR[16] = "   te atiendo";
+const char MENSAJE_6_SUPERIOR[16] = "  Llamame al";
+const char MENSAJE_6_INFERIOR[16] = "      cel";
 
 const byte FIL=4;
 const byte COL=4;
