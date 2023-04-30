@@ -10,7 +10,7 @@
 // Constantes
 // ------------------------------------------------
 
-LiquidCrystal lcd(12,11,14,15,16,17);
+LiquidCrystal lcd(12, 11, 14, 15, 16, 17);
 
 const char TECLA_1 = '1';
 const char TECLA_2 = '2';
@@ -42,8 +42,8 @@ const char MENSAJE_5_INFERIOR[16] = "   te atiendo";
 const char MENSAJE_6_SUPERIOR[16] = "  Llamame al";
 const char MENSAJE_6_INFERIOR[16] = "      cel";
 
-const byte FIL=4;
-const byte COL=4;
+const byte FIL = 4;
+const byte COL = 4;
 
 // ------------------------------------------------
 // TEMPORIZADORES
@@ -62,24 +62,23 @@ const byte COL=4;
 // ------------------------------------------------
 // Teclado matricial
 // ------------------------------------------------
-byte pin_fil[]={9,8,7,6};
-byte pin_col[]={5,4,3,2};
+byte pin_fil[] = {9, 8, 7, 6};
+byte pin_col[] = {5, 4, 3, 2};
 
-char teclas[FIL][COL]=
-{
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
-};
+char teclas[FIL][COL] =
+        {
+                {'1', '2', '3', 'A'},
+                {'4', '5', '6', 'B'},
+                {'7', '8', '9', 'C'},
+                {'*', '0', '#', 'D'}
+        };
 
-Keypad teclado4x4=Keypad(makeKeymap(teclas), pin_fil, pin_col, FIL, COL);
+Keypad teclado4x4 = Keypad(makeKeymap(teclas), pin_fil, pin_col, FIL, COL);
 
 // ------------------------------------------------
 // Estados del embebido
 // ------------------------------------------------
-enum estado_e
-{
+enum estado_e {
     ESTADO_NO_MOLESTAR,
     ESTADO_ESPERANDO_VISITAS,
     ESTADO_VISITANTE_AFUERA,
@@ -89,8 +88,7 @@ enum estado_e
 // ------------------------------------------------
 // Eventos posibles
 // ------------------------------------------------
-enum evento_e
-{
+enum evento_e {
     EVENTO_TECLA_NO_MOLESTAR,
     EVENTO_CAMBIAR_MENSAJE,
     EVENTO_VARIAR_POTENCIOMETRO,
@@ -102,11 +100,10 @@ enum evento_e
 // ------------------------------------------------
 // Estructura de evento
 // ------------------------------------------------
-typedef struct evento_s
-{
+typedef struct evento_s {
     evento_e tipo;
     char mensajeSuperior[16];
-	char mensajeInferior[16];
+    char mensajeInferior[16];
 } evento_t;
 
 
@@ -129,242 +126,231 @@ char lastBotMessage[16] = "";
 // Logica de sensores
 // ------------------------------------------------
 
-boolean verificar_pulsador(){
-	return digitalRead(PIN_PULSADOR_INICIO) == HIGH;
+boolean verificar_pulsador() {
+    return digitalRead(PIN_PULSADOR_INICIO) == HIGH;
 }
 
-boolean verificar_variacion_potenciometro(){
-	int volumen_piezo_nuevo = analogRead(PIN_POTENCIOMETRO);
-	return volumen_piezo_nuevo != volumen_piezo;
+boolean verificar_variacion_potenciometro() {
+    int volumen_piezo_nuevo = analogRead(PIN_POTENCIOMETRO);
+    return volumen_piezo_nuevo != volumen_piezo;
 }
 
-boolean tomar_tecla(char tecla){
-	if(tecla != NULL){
-	
-	switch(tecla)
-	{
-	  case  TECLA_1:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior, MENSAJE_1_SUPERIOR);
-		strcpy(evento.mensajeInferior, MENSAJE_1_INFERIOR);
-		break;
-	  case  TECLA_2:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior, MENSAJE_2_SUPERIOR);
-		strcpy(evento.mensajeInferior, MENSAJE_2_INFERIOR);
-		break;
-	  case  TECLA_3:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior,  MENSAJE_3_SUPERIOR);
-		strcpy(evento.mensajeInferior,  MENSAJE_3_INFERIOR);
-		break;
-	  case  TECLA_4:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior, MENSAJE_4_SUPERIOR);
-		strcpy(evento.mensajeInferior, MENSAJE_4_INFERIOR);
-		break;
-	  case  TECLA_5:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior,  MENSAJE_5_SUPERIOR);
-		strcpy(evento.mensajeInferior,  MENSAJE_5_INFERIOR);
-		break;
-	  case  TECLA_6:
-		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-		strcpy(evento.mensajeSuperior, MENSAJE_6_SUPERIOR);
-		strcpy(evento.mensajeInferior, MENSAJE_6_INFERIOR);
-		break;
-	  default:
-		Serial.println("Tecla no valida");
-	}
-	}
+boolean tomar_tecla(char tecla) {
+    if (tecla != NULL) {
+
+        switch (tecla) {
+            case TECLA_1:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_1_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_1_INFERIOR);
+                break;
+            case TECLA_2:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_2_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_2_INFERIOR);
+                break;
+            case TECLA_3:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_3_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_3_INFERIOR);
+                break;
+            case TECLA_4:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_4_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_4_INFERIOR);
+                break;
+            case TECLA_5:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_5_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_5_INFERIOR);
+                break;
+            case TECLA_6:
+                evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+                strcpy(evento.mensajeSuperior, MENSAJE_6_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_6_INFERIOR);
+                break;
+            default:
+                Serial.println("Tecla no valida");
+        }
+    }
 }
 
 // ------------------------------------------------
 // Logica de actuadores
 // ------------------------------------------------
 
-void cambiar_volumen_piezo(){
-   volumen_piezo = analogRead(PIN_POTENCIOMETRO);
+void cambiar_volumen_piezo() {
+    volumen_piezo = analogRead(PIN_POTENCIOMETRO);
 }
 
-void sonar_piezo(){
-   tone(PIN_PIEZO, volumen_piezo, 1000);
+void sonar_piezo() {
+    tone(PIN_PIEZO, volumen_piezo, 1000);
 }
 
-void cambiar_mensaje(){
-  if(strcmp(evento.mensajeSuperior,lastTopMessage) != 0 && strcmp(evento.mensajeInferior,lastBotMessage) != 0){
-    strcpy(lastTopMessage,evento.mensajeSuperior);
-    strcpy(lastBotMessage,evento.mensajeInferior);
-    lcd.clear();
-    lcd.setCursor(0,0);
-    lcd.print(evento.mensajeSuperior);
-    lcd.setCursor(0,1);
-    lcd.print(evento.mensajeInferior);
-  }
+void cambiar_mensaje() {
+    if (strcmp(evento.mensajeSuperior, lastTopMessage) != 0 && strcmp(evento.mensajeInferior, lastBotMessage) != 0) {
+        strcpy(lastTopMessage, evento.mensajeSuperior);
+        strcpy(lastBotMessage, evento.mensajeInferior);
+        lcd.clear();
+        lcd.setCursor(0, 0);
+        lcd.print(evento.mensajeSuperior);
+        lcd.setCursor(0, 1);
+        lcd.print(evento.mensajeInferior);
+    }
 }
 
 // ------------------------------------------------
 // Captura de eventos
 // ------------------------------------------------
 
-void tomar_evento()
-{
-	char tecla = teclado4x4.getKey();
+void tomar_evento() {
+    char tecla = teclado4x4.getKey();
 
-	switch (estado_actual)
-    {
-    case ESTADO_NO_MOLESTAR:
-	  if(tecla == TECLA_NUMERAL){
-		evento.tipo = EVENTO_TECLA_REINICIO;
-		strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
-		strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
-	  }
-	  break;
-    case ESTADO_ESPERANDO_VISITAS:
-		if(verificar_variacion_potenciometro()){
-			cambiar_volumen_piezo();
-		}
-		if(tecla == TECLA_ASTERISCO){
-			evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
-			strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
-			strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
-			break;
-		}
-		//tomar_tecla();
-		if(verificar_pulsador()){
-			evento.tipo = EVENTO_PULSADOR;
-			strcpy(evento.mensajeSuperior, MENSAJE_ESPERANDO_RESPUESTA_SUPERIOR);
-			strcpy(evento.mensajeInferior, MENSAJE_ESPERANDO_RESPUESTA_INFERIOR);
-		}
-		break;
-    case ESTADO_VISITANTE_AFUERA:
-		if(tecla == TECLA_ASTERISCO){
-			evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
-			strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
-			strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
-		}
-		tomar_tecla(tecla);
-		// verificar timeout
-		break;
-    case ESTADO_VISITANTE_INFORMADO:
-		if(tecla == TECLA_NUMERAL){
-			evento.tipo = EVENTO_TECLA_REINICIO;
-			strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
-			strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
-		}
-		else{
-			tomar_tecla(tecla);
-		}
-		// verificar timeout
-		break;
+    switch (estado_actual) {
+        case ESTADO_NO_MOLESTAR:
+            if (tecla == TECLA_NUMERAL) {
+                evento.tipo = EVENTO_TECLA_REINICIO;
+                strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
+            }
+            break;
+        case ESTADO_ESPERANDO_VISITAS:
+            if (verificar_variacion_potenciometro()) {
+                cambiar_volumen_piezo();
+            }
+            if (tecla == TECLA_ASTERISCO) {
+                evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
+                strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
+                break;
+            }
+            //tomar_tecla();
+            if (verificar_pulsador()) {
+                evento.tipo = EVENTO_PULSADOR;
+                strcpy(evento.mensajeSuperior, MENSAJE_ESPERANDO_RESPUESTA_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_ESPERANDO_RESPUESTA_INFERIOR);
+            }
+            break;
+        case ESTADO_VISITANTE_AFUERA:
+            if (tecla == TECLA_ASTERISCO) {
+                evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
+                strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
+            }
+            tomar_tecla(tecla);
+            // verificar timeout
+            break;
+        case ESTADO_VISITANTE_INFORMADO:
+            if (tecla == TECLA_NUMERAL) {
+                evento.tipo = EVENTO_TECLA_REINICIO;
+                strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
+                strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
+            } else {
+                tomar_tecla(tecla);
+            }
+            // verificar timeout
+            break;
     }
 }
 
 // ------------------------------------------------
 // Inicialización
 // ------------------------------------------------
-void start()
-{
-Serial.println("start");
-	Serial.begin(9600);
-	lcd.begin(16,2);
-	pinMode(PIN_PIEZO, OUTPUT);
-	pinMode(PIN_PULSADOR_INICIO, INPUT);
-	pinMode(PIN_POTENCIOMETRO,INPUT);
-	volumen_piezo = analogRead(PIN_POTENCIOMETRO);
-	estado_actual = ESTADO_ESPERANDO_VISITAS;
-	evento.tipo = EVENTO_CAMBIAR_MENSAJE;
-	strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
-	strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
+void start() {
+    Serial.println("start");
+    Serial.begin(9600);
+    lcd.begin(16, 2);
+    pinMode(PIN_PIEZO, OUTPUT);
+    pinMode(PIN_PULSADOR_INICIO, INPUT);
+    pinMode(PIN_POTENCIOMETRO, INPUT);
+    volumen_piezo = analogRead(PIN_POTENCIOMETRO);
+    estado_actual = ESTADO_ESPERANDO_VISITAS;
+    evento.tipo = EVENTO_CAMBIAR_MENSAJE;
+    strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
+    strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
 }
 
 // ------------------------------------------------
 // Implementación maquina de estados
 // ------------------------------------------------
-void fsm()
-{
+void fsm() {
     tomar_evento();
-    switch (estado_actual)
-    {
-	case ESTADO_NO_MOLESTAR:
-		Serial.println("ESTADO NO MOLESTAR");
-		switch (evento.tipo)
-		{
-		case EVENTO_TECLA_REINICIO:
-			cambiar_mensaje();
-			estado_actual = ESTADO_ESPERANDO_VISITAS;
-			break;
-		default:
-			break;
-		}
-		break;
+    switch (estado_actual) {
+        case ESTADO_NO_MOLESTAR:
+            Serial.println("ESTADO NO MOLESTAR");
+            switch (evento.tipo) {
+                case EVENTO_TECLA_REINICIO:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_ESPERANDO_VISITAS;
+                    break;
+                default:
+                    break;
+            }
+            break;
 
-    case ESTADO_ESPERANDO_VISITAS:
-		//Serial.println("ESTADO_ESPERANDO_VISITAS");
-	
-        switch (evento.tipo)
-        {
-        case EVENTO_TECLA_NO_MOLESTAR:
-			cambiar_mensaje();
-            estado_actual = ESTADO_NO_MOLESTAR;
+        case ESTADO_ESPERANDO_VISITAS:
+            //Serial.println("ESTADO_ESPERANDO_VISITAS");
+
+            switch (evento.tipo) {
+                case EVENTO_TECLA_NO_MOLESTAR:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_NO_MOLESTAR;
+                    break;
+                case EVENTO_CAMBIAR_MENSAJE:
+                    cambiar_mensaje();
+                    //Serial.println("evento CAMBIAR MENSAJE");
+                    estado_actual = ESTADO_ESPERANDO_VISITAS;
+                    break;
+                case EVENTO_PULSADOR:
+                    cambiar_mensaje();
+                    sonar_piezo();
+                    estado_actual = ESTADO_VISITANTE_AFUERA;
+                    break;
+                default:
+                    break;
+            }
             break;
-		case EVENTO_CAMBIAR_MENSAJE:
-			cambiar_mensaje();
-			//Serial.println("evento CAMBIAR MENSAJE");
-            estado_actual = ESTADO_ESPERANDO_VISITAS;
+
+        case ESTADO_VISITANTE_AFUERA:
+            switch (evento.tipo) {
+                case EVENTO_TECLA_NO_MOLESTAR:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_NO_MOLESTAR;
+                    break;
+                case EVENTO_CAMBIAR_MENSAJE:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_VISITANTE_INFORMADO;
+                    break;
+                case EVENTO_TIMEOUT:
+                    // actualizar mensaje default (bienvenido)
+                    estado_actual = ESTADO_ESPERANDO_VISITAS;
+                    break;
+                default:
+                    break;
+            }
             break;
-        case EVENTO_PULSADOR:
-			cambiar_mensaje();
-			sonar_piezo();
-            estado_actual = ESTADO_VISITANTE_AFUERA;
+
+        case ESTADO_VISITANTE_INFORMADO:
+            switch (evento.tipo) {
+                case EVENTO_CAMBIAR_MENSAJE:
+                    cambiar_mensaje();
+                    // reinciar tiempo para timeout
+                    estado_actual = ESTADO_VISITANTE_INFORMADO;
+                    break;
+                case EVENTO_TIMEOUT:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_ESPERANDO_VISITAS;
+                    break;
+                case EVENTO_TECLA_REINICIO:
+                    cambiar_mensaje();
+                    estado_actual = ESTADO_ESPERANDO_VISITAS;
+                    break;
+                default:
+                    break;
+            }
             break;
         default:
             break;
-        }
-        break;
-
-    case ESTADO_VISITANTE_AFUERA:
-        switch (evento.tipo)
-        {
-        case EVENTO_TECLA_NO_MOLESTAR:
-			cambiar_mensaje();
-            estado_actual = ESTADO_NO_MOLESTAR;
-            break;
-		case EVENTO_CAMBIAR_MENSAJE:
-			cambiar_mensaje();
-            estado_actual = ESTADO_VISITANTE_INFORMADO;
-            break;
-        case EVENTO_TIMEOUT:
-			// actualizar mensaje default (bienvenido)
-            estado_actual = ESTADO_ESPERANDO_VISITAS;
-            break;
-        default:
-            break;
-        }
-        break;
-
-    case ESTADO_VISITANTE_INFORMADO:
-        switch (evento.tipo)
-        {
-		case EVENTO_CAMBIAR_MENSAJE:
-			cambiar_mensaje();
-			// reinciar tiempo para timeout
-            estado_actual = ESTADO_VISITANTE_INFORMADO;
-            break;
-        case EVENTO_TIMEOUT:
-			cambiar_mensaje();
-            estado_actual = ESTADO_ESPERANDO_VISITAS;
-            break;
-        case EVENTO_TECLA_REINICIO:
-			cambiar_mensaje();
-            estado_actual = ESTADO_ESPERANDO_VISITAS;
-            break;
-        default:
-            break;
-        }
-        break;
-		default:
-			break;
     }
 
 }
@@ -372,15 +358,13 @@ void fsm()
 // ------------------------------------------------
 // Arduino setup
 // ------------------------------------------------
-void setup()
-{
+void setup() {
     start();
 }
 
 // ------------------------------------------------
 // Arduino loop
 // ------------------------------------------------
-void loop()
-{
+void loop() {
     fsm();
 }
