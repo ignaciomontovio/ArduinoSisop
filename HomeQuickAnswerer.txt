@@ -123,7 +123,8 @@ unsigned long timepo_actual;
 unsigned long tiempo_servicio_desde;
 unsigned long tiempo_servicio_hasta;
 
-
+char lastTopMessage[16] = "";
+char lastBotMessage[16] = "";
 // ------------------------------------------------
 // Logica de sensores
 // ------------------------------------------------
@@ -191,11 +192,15 @@ void sonar_piezo(){
 }
 
 void cambiar_mensaje(){
-  lcd.clear();
-  lcd.setCursor(0,0);          
-  lcd.print(evento.mensajeSuperior); 
-  lcd.setCursor(0,1);         
-  lcd.print(evento.mensajeInferior);
+  if(strcmp(evento.mensajeSuperior,lastTopMessage) != 0 && strcmp(evento.mensajeInferior,lastBotMessage) != 0){
+    strcpy(lastTopMessage,evento.mensajeSuperior);
+    strcpy(lastBotMessage,evento.mensajeInferior);
+    lcd.clear();
+    lcd.setCursor(0,0);
+    lcd.print(evento.mensajeSuperior);
+    lcd.setCursor(0,1);
+    lcd.print(evento.mensajeInferior);
+  }
 }
 
 // ------------------------------------------------
