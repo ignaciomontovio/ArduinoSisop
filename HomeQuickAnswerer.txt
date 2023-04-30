@@ -22,9 +22,12 @@ const char TECLA_NUMERAL = '#';
 const char TECLA_ASTERISCO = '*';
 
 const char MENSAJE_BIENVENIDO_SUPERIOR[16] = "    Bienvenido";
-const char MENSAJE_BIENVENIDO_INFERIOR[16] = "";
+const char MENSAJE_BIENVENIDO_INFERIOR[16] = "               ";
 const char MENSAJE_NO_MOLESTAR_SUPERIOR[16] = "      NO";
 const char MENSAJE_NO_MOLESTAR_INFERIOR[16] = "   MOLESTAR";
+const char MENSAJE_ESPERANDO_RESPUESTA_SUPERIOR[16] = "   ESPERANDO   ";
+const char MENSAJE_ESPERANDO_RESPUESTA_INFERIOR[16] = "   RESPUESTA   ";
+
 
 const char MENSAJE_1_INFERIOR[16] = "    Bienvenido";
 const char MENSAJE_1_SUPERIOR[16] = "    Bienvenido";
@@ -135,13 +138,14 @@ boolean verificar_variacion_potenciometro(){
 }
 
 boolean tomar_tecla(char tecla){
+	if(tecla != NULL){
+	
 	switch(tecla)
 	{
 	  case  TECLA_1:
 		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
 		strcpy(evento.mensajeSuperior, MENSAJE_1_SUPERIOR);
 		strcpy(evento.mensajeInferior, MENSAJE_1_INFERIOR);
-
 		break;
 	  case  TECLA_2:
 		evento.tipo = EVENTO_CAMBIAR_MENSAJE;
@@ -171,6 +175,7 @@ boolean tomar_tecla(char tecla){
 	  default:
 		Serial.println("Tecla no valida");
 	}
+	}
 }
 
 // ------------------------------------------------
@@ -186,7 +191,6 @@ void sonar_piezo(){
 }
 
 void cambiar_mensaje(){
-	Serial.println("cambiar mensaje");
   lcd.clear();
   lcd.setCursor(0,0);          
   lcd.print(evento.mensajeSuperior); 
@@ -208,7 +212,7 @@ void tomar_evento()
 	  if(tecla == TECLA_NUMERAL){
 		evento.tipo = EVENTO_TECLA_REINICIO;
 		strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
-		strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
+		strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
 	  }
 	  break;
     case ESTADO_ESPERANDO_VISITAS:
@@ -217,27 +221,35 @@ void tomar_evento()
 		}
 		if(tecla == TECLA_ASTERISCO){
 			evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
+			strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
+			strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
 			break;
 		}
 		//tomar_tecla();
 		if(verificar_pulsador()){
 			evento.tipo = EVENTO_PULSADOR;
+			strcpy(evento.mensajeSuperior, MENSAJE_ESPERANDO_RESPUESTA_SUPERIOR);
+			strcpy(evento.mensajeInferior, MENSAJE_ESPERANDO_RESPUESTA_INFERIOR);
 		}
 		break;
     case ESTADO_VISITANTE_AFUERA:
 		if(tecla == TECLA_ASTERISCO){
 			evento.tipo = EVENTO_TECLA_NO_MOLESTAR;
 			strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_SUPERIOR);
-			strcpy(evento.mensajeSuperior, MENSAJE_NO_MOLESTAR_INFERIOR);
+			strcpy(evento.mensajeInferior, MENSAJE_NO_MOLESTAR_INFERIOR);
 		}
 		tomar_tecla(tecla);
 		// verificar timeout
 		break;
     case ESTADO_VISITANTE_INFORMADO:
 		if(tecla == TECLA_NUMERAL){
-		evento.tipo = EVENTO_TECLA_REINICIO;
+			evento.tipo = EVENTO_TECLA_REINICIO;
+			strcpy(evento.mensajeSuperior, MENSAJE_BIENVENIDO_SUPERIOR);
+			strcpy(evento.mensajeInferior, MENSAJE_BIENVENIDO_INFERIOR);
 		}
-		tomar_tecla(tecla);
+		else{
+			tomar_tecla(tecla);
+		}
 		// verificar timeout
 		break;
     }
@@ -270,6 +282,7 @@ void fsm()
     switch (estado_actual)
     {
 	case ESTADO_NO_MOLESTAR:
+		Serial.println("ESTADO NO MOLESTAR");
 		switch (evento.tipo)
 		{
 		case EVENTO_TECLA_REINICIO:
@@ -282,7 +295,7 @@ void fsm()
 		break;
 
     case ESTADO_ESPERANDO_VISITAS:
-		Serial.println("ESTADO_ESPERANDO_VISITAS");
+		//Serial.println("ESTADO_ESPERANDO_VISITAS");
 	
         switch (evento.tipo)
         {
@@ -292,11 +305,11 @@ void fsm()
             break;
 		case EVENTO_CAMBIAR_MENSAJE:
 			cambiar_mensaje();
-			Serial.println("evento CAMBIAR MENSAJE");
+			//Serial.println("evento CAMBIAR MENSAJE");
             estado_actual = ESTADO_ESPERANDO_VISITAS;
             break;
         case EVENTO_PULSADOR:
-			// actualizar mensaje "esperando respuesta"
+			cambiar_mensaje();
 			sonar_piezo();
             estado_actual = ESTADO_VISITANTE_AFUERA;
             break;
@@ -309,11 +322,11 @@ void fsm()
         switch (evento.tipo)
         {
         case EVENTO_TECLA_NO_MOLESTAR:
-			// actualizar mensaje no molestar
+			cambiar_mensaje();
             estado_actual = ESTADO_NO_MOLESTAR;
             break;
 		case EVENTO_CAMBIAR_MENSAJE:
-			// actualizar mensaje
+			cambiar_mensaje();
             estado_actual = ESTADO_VISITANTE_INFORMADO;
             break;
         case EVENTO_TIMEOUT:
@@ -329,24 +342,26 @@ void fsm()
         switch (evento.tipo)
         {
 		case EVENTO_CAMBIAR_MENSAJE:
-			// actualizar mensaje
+			cambiar_mensaje();
 			// reinciar tiempo para timeout
             estado_actual = ESTADO_VISITANTE_INFORMADO;
             break;
         case EVENTO_TIMEOUT:
-			// actualizar mensaje default (bienvenido)
+			cambiar_mensaje();
             estado_actual = ESTADO_ESPERANDO_VISITAS;
             break;
         case EVENTO_TECLA_REINICIO:
-			// actualizar mensaje default (bienvenido)
+			cambiar_mensaje();
             estado_actual = ESTADO_ESPERANDO_VISITAS;
             break;
         default:
             break;
         }
         break;
+		default:
+			break;
     }
-	case ESTADO_
+
 }
 
 // ------------------------------------------------
