@@ -344,9 +344,6 @@ void fsm() {
                     current_state = CALLER_NOTIFIED_STATE;
                     break;
                 case RESTART_KEY_EVENT:
-                    change_message();
-                    current_state = WAITING_FOR_CALLERS_STATE;
-                    break;
                 case TIMEOUT_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
