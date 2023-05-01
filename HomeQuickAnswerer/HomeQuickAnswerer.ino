@@ -21,26 +21,26 @@ const char KEY_6 = '6';
 const char KEY_NUMBER = '#';
 const char KEY_ASTERISK = '*';
 
-const char WELCOME_MESSAGE_ABOVE[16] = "    Welcome!";
+const char WELCOME_MESSAGE_ABOVE[16] = "    Bienvenido";
 const char WELCOME_MESSAGE_BOTTOM[16] = "               ";
-const char DONT_DISTURB_MESSAGE_ABOVE[16] = "    DO NOT";
-const char DONT_DISTURB_MESSAGE_BOTTOM[16] = "   DISTURB";
-const char WAITING_ANSWER_MESSAGE_ABOVE[16] = "   WAITING   ";
-const char WAITING_ANSWER_MESSAGE_BOTTOM[16] = "   ANSWER... ";
+const char DONT_DISTURB_MESSAGE_ABOVE[16] = "      NO";
+const char DONT_DISTURB_MESSAGE_BOTTOM[16] = "   MOLESTAR";
+const char WAITING_ANSWER_MESSAGE_ABOVE[16] = "   ESPERANDO   ";
+const char WAITING_ANSWER_MESSAGE_BOTTOM[16] = "   RESPUESTA   ";
 
 
-const char MESSAGE_1_ABOVE[16] = "Sorry, I cannot";
-const char MESSAGE_1_BOTTOM[16] = "answer you now";
-const char MESSAGE_2_ABOVE[16] = "I am going   ";
-const char MESSAGE_2_BOTTOM[16] = "wait for me, please";
-const char MESSAGE_3_ABOVE[16] = " Sorry, I am not";
-const char MESSAGE_3_BELOW[16] = "   interested";
-const char MESSAGE_4_ABOVE[16] = " I am not home";
-const char MESSAGE_4_BELOW[16] = " right now";
-const char MESSAGE_5_ABOVE[16] = " I will answer you";
-const char MESSAGE_5_BELOW[16] = "   in five minutes.";
-const char MESSAGE_6_ABOVE[16] = "  Call me ";
-const char MESSAGE_6_BELOW[16] = "  on my cel, please";
+const char MESSAGE_1_ABOVE[16] = "    No puedo";
+const char MESSAGE_1_BOTTOM[16] ="atenderte ahora";
+const char MESSAGE_2_ABOVE[16] = " Estoy saliendo";
+const char MESSAGE_2_BOTTOM[16] = "    esperame";
+const char MESSAGE_3_ABOVE[16] = "    No estoy";
+const char MESSAGE_3_BOTTOM[16] = "   interesado";
+const char MESSAGE_4_ABOVE[16] = "No me encuentro";
+const char MESSAGE_4_BOTTOM[16] = "en este momento";
+const char MESSAGE_5_ABOVE[16] = "  En 5 minutos";
+const char MESSAGE_5_BOTTOM[16] = "   te atiendo";
+const char MESSAGE_6_ABOVE[16] = "  Llamame al";
+const char MESSAGE_6_BOTTOM[16] = "      cel";
 
 const byte ROW = 4;
 const byte COLUMN = 4;
@@ -48,8 +48,9 @@ const byte COLUMN = 4;
 // ------------------------------------------------
 // TEMPORIZADORES
 // ------------------------------------------------
-#define TEMP_EVENTS_MILISECONDS 50 //NO LA USAMOS??
-#define TEMP_SERVICE_MILISECONDS 1000
+#define MAX_TIME_MILLIS 5000
+int flagTimer = 0;
+unsigned long actualTime, previousTime;
 
 // ------------------------------------------------
 // Pines sensores
@@ -152,22 +153,22 @@ boolean get_key(char key) {
             case KEY_3:
                 event.type = CHANGE_MESSAGE_EVENT;
                 strcpy(event.messageAbove, MESSAGE_3_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_3_BELOW);
+                strcpy(event.messageBottom, MESSAGE_3_BOTTOM);
                 break;
             case KEY_4:
                 event.type = CHANGE_MESSAGE_EVENT;
                 strcpy(event.messageAbove, MESSAGE_4_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_4_BELOW);
+                strcpy(event.messageBottom, MESSAGE_4_BOTTOM);
                 break;
             case KEY_5:
                 event.type = CHANGE_MESSAGE_EVENT;
                 strcpy(event.messageAbove, MESSAGE_5_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_5_BELOW);
+                strcpy(event.messageBottom, MESSAGE_5_BOTTOM);
                 break;
             case KEY_6:
                 event.type = CHANGE_MESSAGE_EVENT;
                 strcpy(event.messageAbove, MESSAGE_6_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_6_BELOW);
+                strcpy(event.messageBottom, MESSAGE_6_BOTTOM);
                 break;
             default:
                 Serial.println("Tecla no valida");
@@ -208,6 +209,7 @@ void get_event() {
 
     switch (current_state) {
         case DONT_DISTURB_STATE:
+            flagTimer = 0;
             if (key == KEY_NUMBER) {
                 event.type = RESTART_KEY_EVENT;
                 strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
@@ -215,6 +217,7 @@ void get_event() {
             }
             break;
         case WAITING_FOR_CALLERS_STATE:
+            flagTimer = 0;
             if (check_potentiometer_variation()) {
                 change_buzzer_volume();
             }
@@ -232,23 +235,50 @@ void get_event() {
             }
             break;
         case CALLER_OUTSIDE_STATE:
+            //calcular timeout
+            if(flagTimer == 0){
+              flagTimer = 1;
+              actualTime = millis();
+              previousTime = actualTime;
+            }
+            if(actualTime - previousTime > MAX_TIME_MILLIS){
+               event.type = TIMEOUT_EVENT;
+               strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
+               strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
+               break;
+            }
+            actualTime = millis();
+
             if (key == KEY_ASTERISK) {
                 event.type = DONT_DISTURB_KEY_EVENT;
                 strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
             }
             get_key(key);
-            // verificar timeout
             break;
         case CALLER_NOTIFIED_STATE:
+            //calcular timeout
+            if(flagTimer == 0){
+              flagTimer = 1;
+              actualTime = millis();
+              previousTime = actualTime;
+            }
+            if(actualTime - previousTime > MAX_TIME_MILLIS){
+               event.type = TIMEOUT_EVENT;
+               strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
+               strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
+               break;
+            }
+            actualTime = millis();
+            
             if (key == KEY_NUMBER) {
                 event.type = RESTART_KEY_EVENT;
                 strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
-            } else {
-                get_key(key);
+                break;
             }
-            // verificar timeout
+            
+            get_key(key);
             break;
     }
 }
@@ -322,7 +352,7 @@ void fsm() {
                     current_state = CALLER_NOTIFIED_STATE;
                     break;
                 case TIMEOUT_EVENT:
-                    // actualizar mensaje default (bienvenido)
+                    change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
                     break;
                 default:
@@ -337,11 +367,11 @@ void fsm() {
                     // reinciar tiempo para timeout
                     current_state = CALLER_NOTIFIED_STATE;
                     break;
-                case TIMEOUT_EVENT:
+                case RESTART_KEY_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
                     break;
-                case RESTART_KEY_EVENT:
+                case TIMEOUT_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
                     break;
