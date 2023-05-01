@@ -30,7 +30,7 @@ const char WAITING_ANSWER_MESSAGE_BOTTOM[16] = "   RESPUESTA   ";
 
 
 const char MESSAGE_1_ABOVE[16] = "    No puedo";
-const char MESSAGE_1_BOTTOM[16] ="atenderte ahora";
+const char MESSAGE_1_BOTTOM[16] = "atenderte ahora";
 const char MESSAGE_2_ABOVE[16] = " Estoy saliendo";
 const char MESSAGE_2_BOTTOM[16] = "    esperame";
 const char MESSAGE_3_ABOVE[16] = "    No estoy";
@@ -92,7 +92,6 @@ enum state_enum {
 enum event_enum {
     DONT_DISTURB_KEY_EVENT,
     CHANGE_MESSAGE_EVENT,
-    VARY_POTENTIOMETER_EVENT,
     PUSH_BUTTON_EVENT,
     TIMEOUT_EVENT,
     RESTART_KEY_EVENT
@@ -107,7 +106,6 @@ typedef struct event_struct {
     char messageBottom[16];
 } event_t;
 
-
 // ------------------------------------------------
 // Variables globales
 // ------------------------------------------------
@@ -115,14 +113,28 @@ state_enum current_state;
 event_t event;
 int buzzer_volume;
 
-//No se usan
-//unsigned long past_time;
-//unsigned long actual_time;
-//unsigned long tiempo_servicio_desde;
-//unsigned long tiempo_servicio_hasta;
-
 char lastTopMessage[16] = "";
 char lastBotMessage[16] = "";
+
+// ------------------------------------------------
+// Logica de temporizadores
+// ------------------------------------------------
+
+boolean verifyTimeout() {
+    if (flagTimer == 0) {
+        flagTimer = 1;
+        actualTime = millis();
+        previousTime = actualTime;
+    }
+    if (actualTime - previousTime > MAX_TIME_MILLIS) {
+        event.type = TIMEOUT_EVENT;
+        strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
+        strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
+        return true;
+    }
+    actualTime = millis();
+    return false;
+}
 // ------------------------------------------------
 // Logica de sensores
 // ------------------------------------------------
@@ -138,7 +150,6 @@ boolean check_potentiometer_variation() {
 
 boolean get_key(char key) {
     if (key != NULL) {
-
         switch (key) {
             case KEY_1:
                 event.type = CHANGE_MESSAGE_EVENT;
@@ -171,7 +182,7 @@ boolean get_key(char key) {
                 strcpy(event.messageBottom, MESSAGE_6_BOTTOM);
                 break;
             default:
-                Serial.println("Tecla no valida");
+                Serial.println("Key not valid");
         }
     }
 }
@@ -227,7 +238,6 @@ void get_event() {
                 strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
                 break;
             }
-            //get_key();
             if (check_push_button()) {
                 event.type = PUSH_BUTTON_EVENT;
                 strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
@@ -235,49 +245,27 @@ void get_event() {
             }
             break;
         case CALLER_OUTSIDE_STATE:
-            //calcular timeout
-            if(flagTimer == 0){
-              flagTimer = 1;
-              actualTime = millis();
-              previousTime = actualTime;
+            if (verifyTimeout() == true) {
+                break;
             }
-            if(actualTime - previousTime > MAX_TIME_MILLIS){
-               event.type = TIMEOUT_EVENT;
-               strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
-               strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
-               break;
-            }
-            actualTime = millis();
-
             if (key == KEY_ASTERISK) {
                 event.type = DONT_DISTURB_KEY_EVENT;
                 strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
+                break;
             }
             get_key(key);
             break;
         case CALLER_NOTIFIED_STATE:
-            //calcular timeout
-            if(flagTimer == 0){
-              flagTimer = 1;
-              actualTime = millis();
-              previousTime = actualTime;
+            if (verifyTimeout() == true) {
+                break;
             }
-            if(actualTime - previousTime > MAX_TIME_MILLIS){
-               event.type = TIMEOUT_EVENT;
-               strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
-               strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
-               break;
-            }
-            actualTime = millis();
-            
             if (key == KEY_NUMBER) {
                 event.type = RESTART_KEY_EVENT;
                 strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
                 break;
             }
-            
             get_key(key);
             break;
     }
@@ -287,7 +275,6 @@ void get_event() {
 // Inicialización
 // ------------------------------------------------
 void start() {
-    Serial.println("start");
     Serial.begin(9600);
     lcd.begin(16, 2);
     pinMode(BUZZER_PIN, OUTPUT);
@@ -307,7 +294,6 @@ void fsm() {
     get_event();
     switch (current_state) {
         case DONT_DISTURB_STATE:
-            Serial.println("DONT DISTURB STATE ");
             switch (event.type) {
                 case RESTART_KEY_EVENT:
                     change_message();
@@ -317,10 +303,7 @@ void fsm() {
                     break;
             }
             break;
-
         case WAITING_FOR_CALLERS_STATE:
-            //Serial.println("WAITING_FOR_CALLERS_STATE");
-
             switch (event.type) {
                 case DONT_DISTURB_KEY_EVENT:
                     change_message();
@@ -328,7 +311,6 @@ void fsm() {
                     break;
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
-                    //Serial.println("event CAMBIAR MENSAJE");
                     current_state = WAITING_FOR_CALLERS_STATE;
                     break;
                 case PUSH_BUTTON_EVENT:
@@ -340,7 +322,6 @@ void fsm() {
                     break;
             }
             break;
-
         case CALLER_OUTSIDE_STATE:
             switch (event.type) {
                 case DONT_DISTURB_KEY_EVENT:
@@ -359,12 +340,10 @@ void fsm() {
                     break;
             }
             break;
-
         case CALLER_NOTIFIED_STATE:
             switch (event.type) {
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
-                    // reinciar tiempo para timeout
                     current_state = CALLER_NOTIFIED_STATE;
                     break;
                 case RESTART_KEY_EVENT:
@@ -382,7 +361,6 @@ void fsm() {
         default:
             break;
     }
-
 }
 
 // ------------------------------------------------
