@@ -2,11 +2,6 @@
 #include <Keypad.h>
 
 // ------------------------------------------------
-// Etiquetas
-// ------------------------------------------------
-#define LOG // Comentar esta linea para desactivar logs
-
-// ------------------------------------------------
 // Constantes
 // ------------------------------------------------
 
@@ -242,7 +237,9 @@ void get_event() {
                 event.type = PUSH_BUTTON_EVENT;
                 strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WAITING_ANSWER_MESSAGE_BOTTOM);
+                break;
             }
+            get_key(key);
             break;
         case CALLER_OUTSIDE_STATE:
             if (verifyTimeout() == true) {
@@ -311,7 +308,7 @@ void fsm() {
                     break;
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
-                    current_state = WAITING_FOR_CALLERS_STATE;
+                    current_state = CALLER_NOTIFIED_STATE;
                     break;
                 case PUSH_BUTTON_EVENT:
                     change_message();
