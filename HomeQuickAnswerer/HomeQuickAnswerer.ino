@@ -74,7 +74,8 @@ Keypad keypad4x4 = Keypad(makeKeymap(keys), row_pin, column_pin, ROW, COLUMN);
 // ------------------------------------------------
 // Estados del embebido
 // ------------------------------------------------
-enum state_enum {
+enum state_enum
+{
     DONT_DISTURB_STATE,
     WAITING_FOR_CALLERS_STATE,
     CALLER_OUTSIDE_STATE,
@@ -84,7 +85,8 @@ enum state_enum {
 // ------------------------------------------------
 // Eventos posibles
 // ------------------------------------------------
-enum event_enum {
+enum event_enum
+{
     DONT_DISTURB_KEY_EVENT,
     CHANGE_MESSAGE_EVENT,
     PUSH_BUTTON_EVENT,
@@ -95,7 +97,8 @@ enum event_enum {
 // ------------------------------------------------
 // Estructura de event
 // ------------------------------------------------
-typedef struct event_struct {
+typedef struct event_struct
+{
     event_enum type;
     char messageAbove[16];
     char messageBottom[16];
@@ -115,13 +118,16 @@ char lastBotMessage[16] = "";
 // Logica de temporizadores
 // ------------------------------------------------
 
-boolean verifyTimeout() {
-    if (flagTimer == 0) {
+boolean verifyTimeout()
+{
+    if (flagTimer == 0)
+    {
         flagTimer = 1;
         actualTime = millis();
         previousTime = actualTime;
     }
-    if (actualTime - previousTime > MAX_TIME_MILLIS) {
+    if (actualTime - previousTime > MAX_TIME_MILLIS)
+    {
         event.type = TIMEOUT_EVENT;
         strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
         strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
@@ -134,18 +140,23 @@ boolean verifyTimeout() {
 // Logica de sensores
 // ------------------------------------------------
 
-boolean check_push_button() {
+boolean check_push_button()
+{
     return digitalRead(START_PUSH_BUTTON_PIN) == HIGH;
 }
 
-boolean check_potentiometer_variation() {
+boolean check_potentiometer_variation()
+{
     int buzzer_volume_new = analogRead(POTENTIOMETER_PIN);
     return buzzer_volume_new != buzzer_volume;
 }
 
-boolean get_key(char key) {
-    if (key != NULL) {
-        switch (key) {
+boolean get_key(char key)
+{
+    if (key != NULL)
+    {
+        switch (key)
+        {
             case KEY_1:
                 event.type = CHANGE_MESSAGE_EVENT;
                 strcpy(event.messageAbove, MESSAGE_1_ABOVE);
@@ -186,16 +197,20 @@ boolean get_key(char key) {
 // Logica de actuadores
 // ------------------------------------------------
 
-void change_buzzer_volume() {
+void change_buzzer_volume()
+{
     buzzer_volume = analogRead(POTENTIOMETER_PIN);
 }
 
-void to_ring_buzzer() {
+void to_ring_buzzer()
+{
     tone(BUZZER_PIN, buzzer_volume, 1000);
 }
 
-void change_message() {
-    if (strcmp(event.messageAbove, lastTopMessage) != 0 && strcmp(event.messageBottom, lastBotMessage) != 0) {
+void change_message()
+{
+    if (strcmp(event.messageAbove, lastTopMessage) != 0 && strcmp(event.messageBottom, lastBotMessage) != 0)
+    {
         strcpy(lastTopMessage, event.messageAbove);
         strcpy(lastBotMessage, event.messageBottom);
         lcd.clear();
@@ -210,13 +225,16 @@ void change_message() {
 // Captura de events
 // ------------------------------------------------
 
-void get_event() {
+void get_event()
+{
     char key = keypad4x4.getKey();
 
-    switch (current_state) {
+    switch (current_state)
+    {
         case DONT_DISTURB_STATE:
             flagTimer = 0;
-            if (key == KEY_NUMBER) {
+            if (key == KEY_NUMBER)
+            {
                 event.type = RESTART_KEY_EVENT;
                 strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
@@ -224,16 +242,19 @@ void get_event() {
             break;
         case WAITING_FOR_CALLERS_STATE:
             flagTimer = 0;
-            if (check_potentiometer_variation()) {
+            if (check_potentiometer_variation())
+            {
                 change_buzzer_volume();
             }
-            if (key == KEY_ASTERISK) {
+            if (key == KEY_ASTERISK)
+            {
                 event.type = DONT_DISTURB_KEY_EVENT;
                 strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
                 break;
             }
-            if (check_push_button()) {
+            if (check_push_button())
+            {
                 event.type = PUSH_BUTTON_EVENT;
                 strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WAITING_ANSWER_MESSAGE_BOTTOM);
@@ -242,10 +263,12 @@ void get_event() {
             get_key(key);
             break;
         case CALLER_OUTSIDE_STATE:
-            if (verifyTimeout() == true) {
+            if (verifyTimeout() == true)
+            {
                 break;
             }
-            if (key == KEY_ASTERISK) {
+            if (key == KEY_ASTERISK)
+            {
                 event.type = DONT_DISTURB_KEY_EVENT;
                 strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
@@ -254,10 +277,12 @@ void get_event() {
             get_key(key);
             break;
         case CALLER_NOTIFIED_STATE:
-            if (verifyTimeout() == true) {
+            if (verifyTimeout() == true)
+            {
                 break;
             }
-            if (key == KEY_NUMBER) {
+            if (key == KEY_NUMBER)
+            {
                 event.type = RESTART_KEY_EVENT;
                 strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
                 strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
@@ -271,7 +296,8 @@ void get_event() {
 // ------------------------------------------------
 // Inicialización
 // ------------------------------------------------
-void start() {
+void start()
+{
     Serial.begin(9600);
     lcd.begin(16, 2);
     pinMode(BUZZER_PIN, OUTPUT);
@@ -287,11 +313,14 @@ void start() {
 // ------------------------------------------------
 // Implementación maquina de estados
 // ------------------------------------------------
-void fsm() {
+void fsm()
+{
     get_event();
-    switch (current_state) {
+    switch (current_state)
+    {
         case DONT_DISTURB_STATE:
-            switch (event.type) {
+            switch (event.type)
+            {
                 case RESTART_KEY_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
@@ -301,7 +330,8 @@ void fsm() {
             }
             break;
         case WAITING_FOR_CALLERS_STATE:
-            switch (event.type) {
+            switch (event.type)
+            {
                 case DONT_DISTURB_KEY_EVENT:
                     change_message();
                     current_state = DONT_DISTURB_STATE;
@@ -320,7 +350,8 @@ void fsm() {
             }
             break;
         case CALLER_OUTSIDE_STATE:
-            switch (event.type) {
+            switch (event.type)
+            {
                 case DONT_DISTURB_KEY_EVENT:
                     change_message();
                     current_state = DONT_DISTURB_STATE;
@@ -338,7 +369,8 @@ void fsm() {
             }
             break;
         case CALLER_NOTIFIED_STATE:
-            switch (event.type) {
+            switch (event.type)
+            {
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
                     current_state = CALLER_NOTIFIED_STATE;
@@ -360,13 +392,15 @@ void fsm() {
 // ------------------------------------------------
 // Arduino setup
 // ------------------------------------------------
-void setup() {
+void setup()
+{
     start();
 }
 
 // ------------------------------------------------
 // Arduino loop
 // ------------------------------------------------
-void loop() {
+void loop()
+{
     fsm();
 }
