@@ -91,7 +91,8 @@ enum event_enum
     CHANGE_MESSAGE_EVENT,
     PUSH_BUTTON_EVENT,
     TIMEOUT_EVENT,
-    RESTART_KEY_EVENT
+    RESTART_KEY_EVENT,
+    NONE
 };
 
 // ------------------------------------------------
@@ -120,13 +121,13 @@ char lastBotMessage[16] = "";
 
 boolean verifyTimeout()
 {
-    if (flagTimer == 0)
+    if (flagTimer == 1)
     {
-        flagTimer = 1;
+        flagTimer = 0;
         actualTime = millis();
         previousTime = actualTime;
     }
-    if (actualTime - previousTime > MAX_TIME_MILLIS)
+    if (flagTimer != 2 && actualTime - previousTime > MAX_TIME_MILLIS)
     {
         event.type = TIMEOUT_EVENT;
         strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
@@ -229,68 +230,30 @@ void get_event()
 {
     char key = keypad4x4.getKey();
 
-    switch (current_state)
+    verifyTimeout();
+    if (key == KEY_NUMBER)
     {
-        case DONT_DISTURB_STATE:
-            flagTimer = 0;
-            if (key == KEY_NUMBER)
-            {
-                event.type = RESTART_KEY_EVENT;
-                strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
-                strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
-            }
-            break;
-        case WAITING_FOR_CALLERS_STATE:
-            flagTimer = 0;
-            if (check_potentiometer_variation())
-            {
-                change_buzzer_volume();
-            }
-            if (key == KEY_ASTERISK)
-            {
-                event.type = DONT_DISTURB_KEY_EVENT;
-                strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
-                strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
-                break;
-            }
-            if (check_push_button())
-            {
-                event.type = PUSH_BUTTON_EVENT;
-                strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
-                strcpy(event.messageBottom, WAITING_ANSWER_MESSAGE_BOTTOM);
-                break;
-            }
-            get_key(key);
-            break;
-        case CALLER_OUTSIDE_STATE:
-            if (verifyTimeout() == true)
-            {
-                break;
-            }
-            if (key == KEY_ASTERISK)
-            {
-                event.type = DONT_DISTURB_KEY_EVENT;
-                strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
-                strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
-                break;
-            }
-            get_key(key);
-            break;
-        case CALLER_NOTIFIED_STATE:
-            if (verifyTimeout() == true)
-            {
-                break;
-            }
-            if (key == KEY_NUMBER)
-            {
-                event.type = RESTART_KEY_EVENT;
-                strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
-                strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
-                break;
-            }
-            get_key(key);
-            break;
+        event.type = RESTART_KEY_EVENT;
+        strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
+        strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
     }
+    if (check_potentiometer_variation())
+    {
+        change_buzzer_volume();
+    }
+    if (key == KEY_ASTERISK)
+    {
+        event.type = DONT_DISTURB_KEY_EVENT;
+        strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
+        strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
+    }
+    if (check_push_button())
+    {
+        event.type = PUSH_BUTTON_EVENT;
+        strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
+        strcpy(event.messageBottom, WAITING_ANSWER_MESSAGE_BOTTOM);
+    }
+    get_key(key);
 }
 
 // ------------------------------------------------
@@ -305,9 +268,10 @@ void start()
     pinMode(POTENTIOMETER_PIN, INPUT);
     buzzer_volume = analogRead(POTENTIOMETER_PIN);
     current_state = WAITING_FOR_CALLERS_STATE;
-    event.type = CHANGE_MESSAGE_EVENT;
+    event.type = NONE;
     strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
     strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
+    change_message();
 }
 
 // ------------------------------------------------
@@ -319,31 +283,39 @@ void fsm()
     switch (current_state)
     {
         case DONT_DISTURB_STATE:
+            flagTimer = 2;
             switch (event.type)
             {
                 case RESTART_KEY_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
+                    event.type = NONE;
                     break;
                 default:
                     break;
             }
             break;
         case WAITING_FOR_CALLERS_STATE:
+            flagTimer = 2;
             switch (event.type)
             {
                 case DONT_DISTURB_KEY_EVENT:
                     change_message();
                     current_state = DONT_DISTURB_STATE;
+                    event.type = NONE;
                     break;
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
                     current_state = CALLER_NOTIFIED_STATE;
+                    event.type = NONE;
+                    flagTimer = 1;
                     break;
                 case PUSH_BUTTON_EVENT:
                     change_message();
                     to_ring_buzzer();
                     current_state = CALLER_OUTSIDE_STATE;
+                    event.type = NONE;
+                    flagTimer = 1;
                     break;
                 default:
                     break;
@@ -355,14 +327,18 @@ void fsm()
                 case DONT_DISTURB_KEY_EVENT:
                     change_message();
                     current_state = DONT_DISTURB_STATE;
+                    event.type = NONE;
                     break;
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
                     current_state = CALLER_NOTIFIED_STATE;
+                    event.type = NONE;
+                    flagTimer = 1;
                     break;
                 case TIMEOUT_EVENT:
                     change_message();
                     current_state = WAITING_FOR_CALLERS_STATE;
+                    event.type = NONE;
                     break;
                 default:
                     break;
@@ -373,7 +349,6 @@ void fsm()
             {
                 case CHANGE_MESSAGE_EVENT:
                     change_message();
-                    current_state = CALLER_NOTIFIED_STATE;
                     break;
                 case RESTART_KEY_EVENT:
                 case TIMEOUT_EVENT:
