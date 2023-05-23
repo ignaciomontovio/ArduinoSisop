@@ -23,19 +23,23 @@ const char DONT_DISTURB_MESSAGE_BOTTOM[16] = "   MOLESTAR";
 const char WAITING_ANSWER_MESSAGE_ABOVE[16] = "   ESPERANDO   ";
 const char WAITING_ANSWER_MESSAGE_BOTTOM[16] = "   RESPUESTA   ";
 
+const char* MESSAGES_ABOVE[6] = {
+    "    No puedo",
+    " Estoy saliendo",
+    "    No estoy",
+    "No me encuentro",
+    "  En 5 minutos",
+    "  Llamame al"
+};
 
-const char MESSAGE_1_ABOVE[16] = "    No puedo";
-const char MESSAGE_1_BOTTOM[16] = "atenderte ahora";
-const char MESSAGE_2_ABOVE[16] = " Estoy saliendo";
-const char MESSAGE_2_BOTTOM[16] = "    esperame";
-const char MESSAGE_3_ABOVE[16] = "    No estoy";
-const char MESSAGE_3_BOTTOM[16] = "   interesado";
-const char MESSAGE_4_ABOVE[16] = "No me encuentro";
-const char MESSAGE_4_BOTTOM[16] = "en este momento";
-const char MESSAGE_5_ABOVE[16] = "  En 5 minutos";
-const char MESSAGE_5_BOTTOM[16] = "   te atiendo";
-const char MESSAGE_6_ABOVE[16] = "  Llamame al";
-const char MESSAGE_6_BOTTOM[16] = "      cel";
+const char* MESSAGES_BOTTOM[6] = {
+    "atenderte ahora",
+    "    esperame",
+    "   interesado",
+    "en este momento",
+    "   te atiendo",
+    "      cel"
+};
 
 const byte ROW = 4;
 const byte COLUMN = 4;
@@ -156,41 +160,35 @@ boolean get_key(char key)
 {
     if (key != NULL)
     {
+	int keyNumber = -1;
         switch (key)
         {
             case KEY_1:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_1_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_1_BOTTOM);
+                keyNumber = 0;
                 break;
             case KEY_2:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_2_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_2_BOTTOM);
+                keyNumber = 1;
                 break;
             case KEY_3:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_3_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_3_BOTTOM);
+                keyNumber = 2;
                 break;
             case KEY_4:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_4_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_4_BOTTOM);
+                keyNumber = 3;
                 break;
             case KEY_5:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_5_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_5_BOTTOM);
+                keyNumber = 4;
                 break;
             case KEY_6:
-                event.type = CHANGE_MESSAGE_EVENT;
-                strcpy(event.messageAbove, MESSAGE_6_ABOVE);
-                strcpy(event.messageBottom, MESSAGE_6_BOTTOM);
+                keyNumber = 5;
                 break;
             default:
                 Serial.println("Key not valid");
         }
+		if(keyNumber != -1){
+			event.type = CHANGE_MESSAGE_EVENT;
+			strcpy(event.messageAbove, MESSAGES_ABOVE[keyNumber]);
+			strcpy(event.messageBottom, MESSAGES_BOTTOM[keyNumber]);
+		}
     }
 }
 
