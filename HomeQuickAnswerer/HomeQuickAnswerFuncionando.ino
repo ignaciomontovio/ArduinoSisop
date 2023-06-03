@@ -1,6 +1,7 @@
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
 #include <Keypad.h>
+#include <SoftwareSerial.h>
 
 // ------------------------------------------------
 // Constantes
@@ -59,6 +60,7 @@ unsigned long actualTime, previousTime;
 #define POTENTIOMETER_PIN  A3
 #define START_PUSH_BUTTON_PIN 13
 #define BUZZER_PIN 10
+SoftwareSerial BTserial(11,12); // TX | RX
 
 // ------------------------------------------------
 // Teclado matricial
@@ -116,6 +118,7 @@ typedef struct event_struct
 state_enum current_state;
 event_t event;
 int buzzer_volume;
+char btKey = ' ';
 
 char lastTopMessage[16] = "";
 char lastBotMessage[16] = "";
@@ -252,6 +255,26 @@ void get_event()
         strcpy(event.messageAbove, WAITING_ANSWER_MESSAGE_ABOVE);
         strcpy(event.messageBottom, WAITING_ANSWER_MESSAGE_BOTTOM);
     }
+    if(BTserial.available())
+    {
+        btKey =(char) BTserial.read();
+        get_key(btKey);
+
+        if (btKey == KEY_ASTERISK)
+        {
+            event.type = DONT_DISTURB_KEY_EVENT;
+            strcpy(event.messageAbove, DONT_DISTURB_MESSAGE_ABOVE);
+            strcpy(event.messageBottom, DONT_DISTURB_MESSAGE_BOTTOM);
+        }
+
+        if (btKey == KEY_NUMBER)
+        {
+            event.type = RESTART_KEY_EVENT;
+            strcpy(event.messageAbove, WELCOME_MESSAGE_ABOVE);
+            strcpy(event.messageBottom, WELCOME_MESSAGE_BOTTOM);
+        }
+        BTserial.flush();
+    }
     get_key(key);
 }
 
@@ -266,6 +289,7 @@ void start()
     // Paso 4
     lcd.backlight();
     Serial.begin(9600);
+    BTserial.begin(9600);
     lcd.begin(16, 2);
     pinMode(BUZZER_PIN, OUTPUT);
     pinMode(START_PUSH_BUTTON_PIN, INPUT);
