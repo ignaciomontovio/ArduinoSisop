@@ -341,6 +341,7 @@ void fsm()
                 case PUSH_BUTTON_EVENT:
                     change_message();
                     to_ring_buzzer();
+                    BTserial.write('1');
                     current_state = CALLER_OUTSIDE_STATE;
                     event.type = NONE;
                     flagTimer = 1;
